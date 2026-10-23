@@ -22,5 +22,28 @@
       document.getElementById('reload-page').onclick = function () { location.reload(); };
       setTimeout(function () { if (!window.storyReady) document.getElementById('fatal-recovery').hidden = false; }, 15000);
     </script>
+    <!-- Umami: isolated from the game and loaded after normal page loading. -->
+    <script>
+      (() => {
+        function loadVisitStats() {
+          try {
+            if (document.getElementById('erzhong-visit-stats')) return;
+            const frame = document.createElement('iframe');
+            frame.id = 'erzhong-visit-stats';
+            frame.title = '匿名访问统计';
+            frame.hidden = true;
+            frame.tabIndex = -1;
+            frame.setAttribute('aria-hidden', 'true');
+            frame.sandbox = 'allow-scripts';
+            frame.referrerPolicy = 'no-referrer';
+            frame.src = './umami-frame.html';
+            document.body.appendChild(frame);
+          } catch {}
+        }
+        if (document.readyState === 'complete') loadVisitStats();
+        else window.addEventListener('load', loadVisitStats, { once: true });
+      })();
+    </script>
+    <!-- /Umami -->
   </body>
 </html>
