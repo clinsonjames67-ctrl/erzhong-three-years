@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>二中三年 · 统计连通性测试</title>
+  <style>
+    body{max-width:42rem;margin:3rem auto;padding:0 1.2rem;font:17px/1.8 system-ui,sans-serif;color:#252537;background:#f7f8fc}
+    button{font:inherit;padding:.55rem 1rem;color:white;background:#4e4d85;border:0;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait} #result{white-space:pre-line;padding:1rem;background:white;border-left:4px solid #4e4d85}
+  </style>
+</head>
+<body>
+  <h1>统计连通性测试</h1>
+  <p>请在中国大陆、不使用代理的网络下点击测试。它只检查 Umami 脚本和一次测试访问是否能送达，不打开游戏，也不读取、修改或上传游戏存档。</p>
+  <button id="start" type="button">开始测试</button>
+  <p id="result" role="status" aria-live="polite">尚未开始。</p>
+  <p>如果通过，请反馈使用的运营商，以及 Wi-Fi 或手机流量。无需提供 IP、账号或存档。</p>
+  <p><a href="./">返回游戏</a></p>
+<script>
+(() => {
+  const button = document.getElementById('start');
+  const result = document.getElementById('result');
+  let frame, timer, scriptLoaded = false;
+  function finish(text) {
+    clearTimeout(timer);
+    result.textContent = text;
+    button.disabled = false;
+  }
+  button.addEventListener('click', () => {
+    frame?.remove();
+    scriptLoaded = false;
+    button.disabled = true;
+    result.textContent = '正在加载 Umami 官方统计脚本……';
+    frame = document.createElement('iframe');
+    frame.hidden = true;
+    frame.sandbox = 'allow-scripts';
+    frame.referrerPolicy = 'no-referrer';
+    frame.title = '统计连通性测试';
+    frame.src = './umami-frame.html?check=1';
+    document.body.appendChild(frame);
+    timer = setTimeout(() => finish(scriptLoaded
+      ? '未通过：脚本已加载，但采集请求未在 25 秒内成功。请反馈此提示。'
+      : '未通过：统计脚本未在 25 秒内成功加载。请反馈此提示。'), 25000);
+  });
+  window.addEventListener('message', event => {
+    if (!frame || event.source !== frame.contentWindow || event.origin !== 'null') return;
+    const message = event.data;
+    if (message?.type !== 'erzhong-umami-check') return;
+    if (message.phase === 'script') {
+      if (!message.ok) finish('未通过：Umami 官方统计脚本加载失败。');
+      else { scriptLoaded = true; result.textContent = '脚本加载成功，正在确认采集请求……'; }
+    } else if (message.phase === 'collect') {
+      finish(message.ok
+        ? '测试通过：脚本加载成功，Umami 已接受测试访问。\n请将“测试通过”和所用网络反馈给发布者。'
+        : `未通过：采集请求未被接受（状态 ${Number(message.status) || '网络错误'}）。请反馈此提示。`);
+    }
+  });
+})();
+</script>
+</body>
+</html>
