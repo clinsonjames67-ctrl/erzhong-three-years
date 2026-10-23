@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <title>二中三年 · 匿名访问统计</title>
+</head>
+<body>
+<script>
+(() => {
+  'use strict';
+  // This document is embedded with sandbox="allow-scripts". The third-party
+  // tracker cannot read the parent document, its localStorage, or IndexedDB.
+  if (window.parent === window) return;
+  const checking = new URLSearchParams(location.search).get('check') === '1';
+  const report = message => {
+    if (checking) window.parent.postMessage({ type: 'erzhong-umami-check', ...message }, '*');
+  };
+  const website = 'f2eba9a1-169b-4a42-bd92-26387b1c6ffd';
+  const hostname = 'clinsonjames67-ctrl.github.io';
+  // Only the diagnostic frame inspects the response. Production uses fetch
+  // unchanged and does not send messages to the game.
+  if (checking) {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+      try {
+        const response = await originalFetch(...args);
+        if (String(args[0]) === 'https://gateway.umami.is/api/send') {
+          let valid = false;
+          try {
+            const value = await response.clone().json();
+            valid = response.ok && value.disabled !== true && typeof value.cache === 'string';
+          } catch {}
+          report({ phase: 'collect', ok: valid, status: response.status });
+        }
+        return response;
+      } catch (error) {
+        report({ phase: 'collect', ok: false, status: 0 });
+        throw error;
+      }
+    };
+  }
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cloud.umami.is/script.js';
+    script.async = true;
+    script.referrerPolicy = 'no-referrer';
+    script.setAttribute('data-website-id', website);
+    script.setAttribute('data-auto-track', 'false');
+    script.setAttribute('data-exclude-search', 'true');
+    script.setAttribute('data-exclude-hash', 'true');
+    script.setAttribute('data-do-not-track', 'true');
+    script.setAttribute('data-fetch-credentials', 'omit');
+    script.onload = () => {
+      report({ phase: 'script', ok: true });
+      try {
+        const result = window.umami?.track(payload => ({
+          website,
+          hostname,
+          screen: payload.screen,
+          language: payload.language,
+          title: checking ? 'Umami 国内连通性测试' : '二中三年',
+          url: checking ? '/erzhong-three-years/__umami_connectivity_check' : '/erzhong-three-years/',
+          referrer: '',
+          ...(checking ? { tag: 'connectivity-test' } : {})
+        }));
+        result?.catch(() => {});
+      } catch { report({ phase: 'collect', ok: false, status: 0 }); }
+    };
+    script.onerror = () => report({ phase: 'script', ok: false });
+    document.head.appendChild(script);
+  } catch { report({ phase: 'script', ok: false }); }
+})();
+</script>
+</body>
+</html>
