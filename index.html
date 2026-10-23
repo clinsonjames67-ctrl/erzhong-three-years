@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#4e4d85" />
+    <meta name="description" content="在苏元山下走过自己的高中三年。校园影像、六学期与不同的人生片段，本地自动存档。" />
+    <title>二中三年 · 苏元山下的校园手记</title>
+    <link rel="icon" type="image/png" href="./assets/crest-DU6SDlyk.png" />
+    <script type="module" crossorigin src="./assets/index-DqKLO_1v.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index--61J0Hdx.css">
+  </head>
+  <body>
+    <div id="app"><main class="boot"><h1>二中三年</h1><p id="boot-message">正在打开你的故事……</p></main></div>
+    <noscript>这个游戏需要启用 JavaScript 才能进行选择和保存进度。</noscript>
+    <div id="fatal-recovery" hidden role="alert" style="padding:20px;background:#f1f2f6;color:#202135;border:2px solid #302854;position:fixed;inset:auto 12px 12px;z-index:9999">
+      <strong>页面暂时无法正常运行。</strong><p>刷新页面不会主动删除本地存档。若仍未恢复，请保留站点数据，稍后重试。</p>
+      <button type="button" id="reload-page">重新加载页面</button>
+    </div>
+    <script>
+      window.addEventListener('error', function (event) { if (event.error || (event.target && event.target.tagName === 'SCRIPT')) document.getElementById('fatal-recovery').hidden = false; }, true);
+      document.getElementById('reload-page').onclick = function () { location.reload(); };
+      setTimeout(function () { if (!window.storyReady) document.getElementById('fatal-recovery').hidden = false; }, 15000);
+    </script>
+  </body>
+</html>
